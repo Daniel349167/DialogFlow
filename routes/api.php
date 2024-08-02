@@ -6,4 +6,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('products', ProductController::class);
-Route::get('products/count/{categoryId}', [ProductController::class, 'countByCategory']);
+Route::post('webhook/products/count', [ProductController::class, 'countByCategory']);

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\Category;
 
 class ProductController extends Controller
 {
@@ -36,9 +37,20 @@ class ProductController extends Controller
         return response()->json(null, 204);
     }
     // Método countByCategory
-    public function countByCategory($categoryId)
+    public function countByCategory(Request $request)
     {
-        $count = Product::where('category_id', $categoryId)->sum('quantity');
-        return response()->json(['count' => $count], 200);
+        $categoryName = $request->input('queryResult.parameters.category');
+
+        $category = Category::where('name', $categoryName)->first();
+
+        if (!$category) {
+            return response()->json(['fulfillmentText' => 'Categoría no encontrada.']);
+        }
+
+        $productCount = Product::where('category_id', $category->id)->sum('quantity');
+
+        return response()->json([
+            'fulfillmentText' => "Hay $productCount productos en la categoría $categoryName."
+        ]);
     }
 }
