@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\Log;
+
 
 class ProductController extends Controller
 {
@@ -39,7 +41,7 @@ class ProductController extends Controller
     // Método countByCategory
     public function countByCategory(Request $request)
     {
-        \Log::info('Request from Dialogflow', ['request' => $request->all()]);
+        Log::info('Request from Dialogflow', ['request' => $request->all()]);
 
         $categoryName = $request->input('queryResult.parameters.category');
 
