@@ -41,18 +41,28 @@ class ProductController extends Controller
     // Método countByCategory
     public function countByCategory(Request $request)
     {
+        // Registrar la solicitud completa para depuración
         Log::info('Request from Dialogflow', ['request' => $request->all()]);
 
+        // Extraer el nombre de la categoría desde los parámetros de la solicitud
         $categoryName = $request->input('queryResult.parameters.category');
 
+        if (!$categoryName) {
+            return response()->json(['fulfillmentText' => 'Categoría no proporcionada.']);
+        }
+
+        // Buscar la categoría en la base de datos
         $category = Category::where('name', $categoryName)->first();
 
         if (!$category) {
+            // Responder si la categoría no se encuentra
             return response()->json(['fulfillmentText' => 'Categoría no encontrada.']);
         }
 
+        // Contar los productos en la categoría encontrada
         $productCount = Product::where('category_id', $category->id)->sum('quantity');
 
+        // Responder con la cantidad de productos
         return response()->json([
             'fulfillmentText' => "Hay $productCount productos en la categoría $categoryName."
         ]);
