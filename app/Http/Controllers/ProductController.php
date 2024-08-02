@@ -39,6 +39,8 @@ class ProductController extends Controller
     // Método countByCategory
     public function countByCategory(Request $request)
     {
+        \Log::info('Request from Dialogflow', ['request' => $request->all()]);
+
         $categoryName = $request->input('queryResult.parameters.category');
 
         $category = Category::where('name', $categoryName)->first();
