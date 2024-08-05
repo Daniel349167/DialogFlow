@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Product;
@@ -41,30 +42,108 @@ class ProductController extends Controller
     // Método countByCategory
     public function countByCategory(Request $request)
     {
-        // Registrar la solicitud completa para depuración
         Log::info('Request from Dialogflow', ['request' => $request->all()]);
 
-        // Extraer el nombre de la categoría desde los parámetros de la solicitud
-        $categoryName = $request->input('queryResult.parameters.category');
+        $intentInfo = $request->input('intentInfo');
+        Log::info('Intent Info from request', ['intentInfo' => $intentInfo]);
 
-        if (!$categoryName) {
-            return response()->json(['fulfillmentText' => 'Categoría no proporcionada.']);
+        if (!$intentInfo) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['No se pudo extraer la información del intento.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
         }
 
-        // Buscar la categoría en la base de datos
+        $parameters = $intentInfo['parameters'] ?? null;
+        Log::info('Parameters from request', ['parameters' => $parameters]);
+
+        if (!$parameters) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['No se pudieron extraer los parámetros.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
+        }
+
+        $categoryResolvedValue = $parameters['category']['resolvedValue'] ?? null;
+        Log::info('Extracted category resolvedValue', ['resolvedValue' => $categoryResolvedValue]);
+
+        if (!$categoryResolvedValue) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['No se pudo extraer el valor de la categoría.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
+        }
+
+        $categoryName = $categoryResolvedValue; // Corregido: asignar directamente el valor
+        Log::info('Extracted category name', ['categoryName' => $categoryName]);
+
+        if (!$categoryName) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['Categoría no proporcionada.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
+        }
+
         $category = Category::where('name', $categoryName)->first();
 
         if (!$category) {
-            // Responder si la categoría no se encuentra
-            return response()->json(['fulfillmentText' => 'Categoría no encontrada.']);
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['Categoría no encontrada.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
         }
 
-        // Contar los productos en la categoría encontrada
         $productCount = Product::where('category_id', $category->id)->sum('quantity');
+        Log::info('Product count', ['productCount' => $productCount]);
 
-        // Responder con la cantidad de productos
-        return response()->json([
-            'fulfillmentText' => "Hay $productCount productos en la categoría $categoryName."
-        ]);
+        $response = [
+            'fulfillment_response' => [
+                'messages' => [
+                    [
+                        'text' => [
+                            'text' => ["Hay $productCount productos en la categoría $categoryName."]
+                        ]
+                    ]
+                ]
+            ],
+            'sessionInfo' => $request->input('sessionInfo')
+        ];
+
+        return response()->json($response, 200, ['Content-Type' => 'application/json']);
     }
 }
