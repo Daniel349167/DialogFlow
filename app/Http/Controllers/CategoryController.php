@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -78,7 +79,7 @@ class CategoryController extends Controller
         $categoryNames = $categories->pluck('name');
         Log::info('Category names', ['categoryNames' => $categoryNames]);
 
-        $responseText = 'Las categorías disponibles son: ' . $categoryNames->join(', ') . '.';
+        $responseText = "Las categorías disponibles son:\n- " . $categoryNames->join("\n- ") . '.';
 
         $response = [
             'fulfillment_response' => [
