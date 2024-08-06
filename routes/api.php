@@ -9,4 +9,5 @@ Route::middleware(['api_token'])->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('products', ProductController::class);
     Route::post('webhook/products/count', [ProductController::class, 'countByCategory']);
+    Route::post('webhook/categories/list', [CategoryController::class, 'listCategories']); 
 });

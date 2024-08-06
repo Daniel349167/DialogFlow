@@ -146,4 +146,63 @@ class ProductController extends Controller
 
         return response()->json($response, 200, ['Content-Type' => 'application/json']);
     }
+
+    public function listCategories(Request $request)
+    {
+        Log::info('Request from Dialogflow', ['request' => $request->all()]);
+
+        $intentInfo = $request->input('intentInfo');
+        Log::info('Intent Info from request', ['intentInfo' => $intentInfo]);
+
+        if (!$intentInfo) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['No se pudo extraer la información del intento.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
+        }
+
+        $categories = Category::all();
+        Log::info('Categories retrieved', ['categories' => $categories]);
+
+        if ($categories->isEmpty()) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['No se encontraron categorías.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
+        }
+
+        $categoryNames = $categories->pluck('name');
+        Log::info('Category names', ['categoryNames' => $categoryNames]);
+
+        $responseText = 'Las categorías disponibles son: ' . $categoryNames->join(', ') . '.';
+
+        $response = [
+            'fulfillment_response' => [
+                'messages' => [
+                    [
+                        'text' => [
+                            'text' => [$responseText]
+                        ]
+                    ]
+                ]
+            ],
+            'sessionInfo' => $request->input('sessionInfo')
+        ];
+
+        return response()->json($response, 200, ['Content-Type' => 'application/json']);
+    }
 }
