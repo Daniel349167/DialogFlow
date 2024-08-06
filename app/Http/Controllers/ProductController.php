@@ -114,19 +114,19 @@ class ProductController extends Controller
 
         $category = Category::where('name', $categoryName)->first();
 
-        // if (!$category) {
-        //     return response()->json([
-        //         'fulfillment_response' => [
-        //             'messages' => [
-        //                 [
-        //                     'text' => [
-        //                         'text' => ['Categoría no encontrada.']
-        //                     ]
-        //                 ]
-        //             ]
-        //         ]
-        //     ], 200, ['Content-Type' => 'application/json']);
-        // }
+        if (!$category) {
+            return response()->json([
+                'fulfillment_response' => [
+                    'messages' => [
+                        [
+                            'text' => [
+                                'text' => ['Categoría no encontrada.']
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200, ['Content-Type' => 'application/json']);
+        }
 
         $productCount = Product::where('category_id', $category->id)->sum('quantity');
         Log::info('Product count', ['productCount' => $productCount]);
