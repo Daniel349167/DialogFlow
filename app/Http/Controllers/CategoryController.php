@@ -79,7 +79,7 @@ class CategoryController extends Controller
         $categoryNames = $categories->pluck('name');
         Log::info('Category names', ['categoryNames' => $categoryNames]);
 
-        $responseText = "Las categorías disponibles son:\n- " . $categoryNames->join("\n- ") . '.';
+        $responseText = "Las categorías disponibles son:\n- " . $categoryNames->join("\n- ");
 
         $response = [
             'fulfillment_response' => [
